@@ -127,3 +127,31 @@ class KMeansCorrelation:
         prediction[bool_corr_within_percentile] = clust + 1
         return correlations_within_clust, prediction
 
+def transition_matrix(transitions):
+    n = 1+ max(transitions) #number of states
+
+    M = [[0]*n for _ in range(n)]
+
+    for (i,j) in zip(transitions,transitions[1:]):
+        M[i][j] += 1
+
+    #now convert to probabilities:
+    for row in M:
+        s = sum(row)
+        if s > 0:
+            row[:] = [f/s for f in row]
+    return M
+
+def extract_array_of_epis(epi_files, commonspace_mask_file):
+    #epi_files should be a glob array of files
+    epi, mask, epi_masked_flat_init = preprocess_nifti(epi_files[0], commonspace_mask_file, False, 0.3)
+
+    for i in range(1, 5):
+        _, mask, epi_masked_flat = preprocess_nifti(epi_files[i], commonspace_mask_file, False, 0.3)
+
+        if i==1:
+            all_epi_masked_flat = np.concatenate((epi_masked_flat_init, epi_masked_flat), axis = 1)
+        else:
+            print(i)
+            all_epi_masked_flat = np.concatenate((all_epi_masked_flat, epi_masked_flat), axis = 1)
+    return all_epi_masked_flat
