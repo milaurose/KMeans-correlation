@@ -2,17 +2,8 @@
 # coding: utf-8
 # In[1]:
 
-
-from sklearn.utils import check_random_state
 import numpy as np
-import nilearn
-import nibabel as nb
-from nilearn.plotting import plot_stat_map
 import matplotlib.pyplot as plt
-import pandas as pd
-from scipy import stats
-import os
-import seaborn as sns
 import pandas as pd
 
 #define custom kmeans class and functions for clustering using correlation as a distance - similar format as sklearn kmeans but with the matlab functionality
