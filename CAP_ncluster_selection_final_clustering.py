@@ -6,7 +6,6 @@
 
 
 import os
-from sklearn.cluster import KMeans
 import sys
 import glob
 import pandas as pd
@@ -16,7 +15,6 @@ from nilearn.plotting import plot_stat_map
 import seaborn as sns
 import pickle
 from scipy import stats
-import nibabel as nb
 import nilearn
 from sklearn.metrics import silhouette_samples, silhouette_score
 import matplotlib.cm as cm
@@ -28,8 +26,8 @@ from clustering_functions import KMeansCorrelation
 n_clusters=int(sys.argv[1])
 print(n_clusters)
 
-#load fMRI data - use the Grandjean and Yeow dataset (cleaned, censored timeseries), RESAMPLED TO MY RESOLUTION
-final_data_folder='/data/chamal/projects/mila/2021_fMRI_dev/part2_phgy_fmri_project/4_derivatives/rabies_runs/mediso-grandjean_yeow-forCAP'
+#load fMRI data 
+final_data_folder='./4_derivatives/rabies_runs/mediso-grandjean_yeow-forCAP'
 epi_files_ref_resampled = sorted(glob.glob(final_data_folder + '/rabies_out_cc-v050_resampled-to-local_05smoothed_lowpass/confound_correction_datasink/cleaned_timeseries/*/sub*'))
 commonspace_template_file_ref_resampled = final_data_folder + '/rabies_out_preprocess-v050_resampled-to-local/bold_datasink/commonspace_resampled_template/resampled_template.nii.gz'
 commonspace_mask_file_ref_resampled = os.path.abspath(sorted(glob.glob(final_data_folder + '/rabies_out_preprocess-v050_resampled-to-local/bold_datasink/commonspace_mask/*/*/*_brain_mask.nii.gz'))[0])
@@ -42,7 +40,6 @@ ref_epi_resampled_flat,ref_epi_dict = clustering_functions.extract_array_of_epis
 #######################################run the clustering ##########################################
 print('running clustering for ' + str(n_clusters) + ' clusters')
 data = np.transpose(ref_epi_resampled_flat)
-#kmeans_object = KMeans(n_clusters=n_clusters, random_state=0, n_init=80, tol=1e-6).fit(data)
 kmeans_object = KMeansCorrelation(n_clusters=n_clusters, n_rep=10,  max_iters=300, random_state=0).fit(data)
 cluster_labels = kmeans_object.labels_
 print('done clustering, now plotting')
@@ -109,6 +106,3 @@ for i in range(0, n_clusters):
                 display_mode='y', colorbar=True)
 axs[0].set_title('Kmeans centroids, reference dataset, resampled - ' + str(n_clusters) + ' clusters' )
 fig2.savefig('./CAP_ncluster_selection/stability_analysis_statmap_n' + str(n_clusters) + '.png')
-
-#note, usually takes 6s per iteration, so if ran 300, would take 30min per initialization
-#when tolerance is included, will converge after 31 reptitions (<3min)
